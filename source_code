@@ -1,0 +1,88 @@
+-- Claudia Batista 
+-- Data source: ACS Census Data, 2022 
+
+/* Utilize unions to display percentages of respondents with a Highschool Degree or Higher or Bachelor or higher 
+from all 9 tables (race)*/
+SELECT 'white only' as 'Race',
+    ((SELECT total FROM white_only WHERE Levels = 'HS_actual') /
+    (SELECT total FROM white_only WHERE Levels = 'Total')) * 100 AS 'Highschool Plus',
+    (SELECT total FROM white_only WHERE Levels = 'Bachelor_Plus') /
+    (SELECT total FROM white_only WHERE Levels = 'Total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'white but not latinx' as 'Race',
+    ((SELECT total FROM white_not_hispanic_or_latino WHERE Levels = 'hs_actual') /
+    (SELECT total FROM white_not_hispanic_or_latino WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM white_not_hispanic_or_latino WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM white_not_hispanic_or_latino WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Black' as 'Race',
+    ((SELECT total FROM black_only WHERE Levels = 'hs_actual') /
+    (SELECT total FROM black_only WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM black_only WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM black_only WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Hispanic or Latinx' as 'Race',
+    ((SELECT total FROM hispanic_latino WHERE Levels = 'hs_actual') /
+    (SELECT total FROM hispanic_latino WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM hispanic_latino WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM hispanic_latino WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Asian' as 'Race',
+    ((SELECT total FROM asian_only WHERE Levels = 'hs_actual') /
+    (SELECT total FROM asian_only WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM asian_only WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM asian_only WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Hawaiian and other Pacific Islanders' as 'Race',
+    ((SELECT total FROM hawaiian_and_other_pacific_islander WHERE Levels = 'hs_actual') /
+    (SELECT total FROM hawaiian_and_other_pacific_islander WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM hawaiian_and_other_pacific_islander WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM hawaiian_and_other_pacific_islander WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'American Indian or Alaskan Native' as 'Race',
+    ((SELECT total FROM american_indian_or_alaska_native WHERE Levels = 'hs_actual') /
+    (SELECT total FROM american_indian_or_alaska_native WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM american_indian_or_alaska_native WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM american_indian_or_alaska_native WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Two or More Races' as 'Race',
+    ((SELECT total FROM two_or_more_races WHERE Levels = 'hs_actual') /
+    (SELECT total FROM two_or_more_races WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM two_or_more_races WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM two_or_more_races WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+UNION 
+SELECT 'Other Races' as 'Race',
+    ((SELECT total FROM some_other_race WHERE Levels = 'hs_actual') /
+    (SELECT total FROM some_other_race WHERE Levels = 'total')) * 100 AS 'Highschool Plus' ,
+    (SELECT total FROM some_other_race WHERE Levels = 'bachelor_plus') /
+    (SELECT total FROM some_other_race WHERE Levels = 'total') * 100 AS 'Bachelor Plus'
+ORDER BY `Bachelor Plus` DESC;
+
+
+/* Display the percentage of male vs female respondents for the bachelor's degree+ and highschool+ educational levels. */ 
+    WITH combined_data AS (
+    SELECT male, female, levels, total FROM white_not_hispanic_or_latino
+    UNION ALL
+    SELECT male, female, levels, total FROM asian_only
+    UNION ALL
+    SELECT male, female, levels, total FROM american_indian_or_alaska_native
+    UNION ALL
+    SELECT male, female, levels, total FROM black_only
+    UNION ALL
+    SELECT male, female, levels, total FROM hawaiian_and_other_pacific_islander
+    UNION ALL
+    SELECT male, female, levels, total FROM hispanic_latino
+    UNION ALL
+    SELECT male, female, levels, total FROM some_other_race
+    UNION ALL
+    SELECT male, female, levels, total FROM two_or_more_races
+    UNION ALL
+    SELECT male, female, levels, total FROM white_only
+)
+SELECT 
+	levels,
+    CONCAT(SUM(male) * 100 / SUM(total), '%') AS `Male Percentage`, 
+    CONCAT(SUM(female) * 100 / SUM(total), '%') AS `Female Percentage`
+FROM combined_data
+WHERE levels = 'bachelor_plus' OR levels = 'hs_actual'
+group by levels;
