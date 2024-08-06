@@ -1,8 +1,9 @@
 -- Claudia Batista 
 -- Data source: ACS Census Data, 2022 
 
-/* Utilize unions to display percentages of respondents with a Highschool Degree or Higher or Bachelor or higher 
-from all 9 tables (race)*/
+/* Utilize UNION to display the percentages of respondents with a high school degree (or higher) 
+or a bachelor's degree (or higher) from all 9 tables, by race .*/
+
 SELECT 'white only' as 'Race',
     ((SELECT total FROM white_only WHERE Levels = 'HS_actual') /
     (SELECT total FROM white_only WHERE Levels = 'Total')) * 100 AS 'Highschool Plus',
@@ -59,7 +60,8 @@ SELECT 'Other Races' as 'Race',
 ORDER BY `Bachelor Plus` DESC;
 
 
-/* Display the percentage of male vs female respondents for the bachelor's degree+ and highschool+ educational levels. */ 
+/* Utilize CTE to display the percentage of male versus female respondents with bachelor's degrees (or higher) 
+or high school diplomas (or higher), by sex. */ 
     WITH combined_data AS (
     SELECT male, female, levels, total FROM white_not_hispanic_or_latino
     UNION ALL
